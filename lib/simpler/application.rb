@@ -33,7 +33,7 @@ module Simpler
         Controller.new(env).not_found_response
       else
         controller = route.controller.new(env)
-        controller.request.params[:id]=route.id unless route.id.nil?
+        controller.request.params.merge!(route.route_params)
         action = route.action
         make_response(controller, action)
       end

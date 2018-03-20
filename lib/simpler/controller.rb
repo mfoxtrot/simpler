@@ -22,14 +22,14 @@ module Simpler
       write_response
 
       @request.env['simpler.response.status'] = @response.status
-      @request.env['simpler.response.header'] = @response['Content-Type']
+      @request.env['simpler.response.header'] = @response.header
 
       @response.finish
     end
 
     def not_found_response
       status 404
-      header 'plain/html'
+      header 'Content-Type' => 'plain/html'
       render 'public/404'
       write_response
       @response.finish
@@ -42,7 +42,7 @@ module Simpler
     end
 
     def set_default_headers
-      @response['Content-Type'] = 'text/html'
+      header 'Content-Type' => 'text/html'
     end
 
     def set_default_status
@@ -63,8 +63,16 @@ module Simpler
     end
 
     def render(render_params)
-      @request.env['simpler.template'] = render_params if render_params.is_a?(String)
-      @request.env['simpler.plain_response'] = render_params[:plain] if render_params.is_a?(Hash)
+      case render_params
+      when String
+        header 'Content-Type' => 'text/html'
+      when Hash
+        if render_params.keys.include?(:plain)
+          header 'Content-Type' => 'plain/text'
+        end
+        # :json, etc...
+      end
+      @request.env['simpler.render_params'] = render_params
     end
 
     def status(new_status)
@@ -72,7 +80,7 @@ module Simpler
     end
 
     def header(new_header)
-      @response['Content-Type'] = new_header
+      new_header.each { |key, value| @response.set_header(key, value) }
     end
 
   end
