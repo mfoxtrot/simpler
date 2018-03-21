@@ -8,9 +8,9 @@ require 'logger'
     end
 
     def call(env)
-      response_hash = @app.call(env)
+      response = @app.call(env)
       @logger.info(prepare_message(env))
-      response_hash
+      response
     end
 
     private
